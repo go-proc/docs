@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Pure-Go (CGO-free) process-lifecycle primitives: a PID-1 subreaper and process supervisor, and a restart/reconcile state machine.">
+        <meta name="description" content="Pure-Go (no cgo) process-lifecycle primitives: a PID-1 subreaper + process supervisor and a restart/reconcile state machine.">
       
       
       
@@ -50,8 +50,6 @@
       
     
     
-      <link rel="stylesheet" href="../assets/extra.css">
-    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -78,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#respawn-restart-state-machine" class="md-skip">
+        <a href="#respawn-restart-reconcile-state-machine" class="md-skip">
           Skip to content
         </a>
       
@@ -140,7 +138,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -150,7 +148,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
     
       <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -295,7 +293,7 @@
         
   
   <span class="md-ellipsis">
-    Why these primitives
+    Design — reap, supervise, respawn
   </span>
   
 
@@ -315,7 +313,7 @@
         
   
   <span class="md-ellipsis">
-    supervisor — reap & supervise
+    supervisor — subreaper + supervisor
   </span>
   
 
@@ -377,46 +375,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-pure-core-decide" class="md-nav__link">
+  <a href="#the-signal-model" class="md-nav__link">
     <span class="md-ellipsis">
-      The pure core: Decide
+      The signal model
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="The pure core: Decide">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-pure-decision-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      The pure decision core
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The pure decision core">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#signals" class="md-nav__link">
+  <a href="#the-flow" class="md-nav__link">
     <span class="md-ellipsis">
-      Signals
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#anti-flap-grace-period-debounce" class="md-nav__link">
-    <span class="md-ellipsis">
-      Anti-flap: grace-period debounce
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#anti-thrash-max_restarts-sliding-window" class="md-nav__link">
-    <span class="md-ellipsis">
-      Anti-thrash: max_restarts sliding window
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#backoff-constant-or-exponential" class="md-nav__link">
-    <span class="md-ellipsis">
-      Backoff: constant or exponential
+      The flow
     </span>
   </a>
   
@@ -428,9 +408,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-concurrent-wrapper-reconciler" class="md-nav__link">
+  <a href="#the-concurrent-reconciler" class="md-nav__link">
     <span class="md-ellipsis">
-      The concurrent wrapper: Reconciler
+      The concurrent Reconciler
     </span>
   </a>
   
@@ -440,15 +420,6 @@
   <a href="#composing-with-supervisor" class="md-nav__link">
     <span class="md-ellipsis">
       Composing with supervisor
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#guarantees" class="md-nav__link">
-    <span class="md-ellipsis">
-      Guarantees
     </span>
   </a>
   
@@ -529,46 +500,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-pure-core-decide" class="md-nav__link">
+  <a href="#the-signal-model" class="md-nav__link">
     <span class="md-ellipsis">
-      The pure core: Decide
+      The signal model
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="The pure core: Decide">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-pure-decision-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      The pure decision core
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The pure decision core">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#signals" class="md-nav__link">
+  <a href="#the-flow" class="md-nav__link">
     <span class="md-ellipsis">
-      Signals
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#anti-flap-grace-period-debounce" class="md-nav__link">
-    <span class="md-ellipsis">
-      Anti-flap: grace-period debounce
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#anti-thrash-max_restarts-sliding-window" class="md-nav__link">
-    <span class="md-ellipsis">
-      Anti-thrash: max_restarts sliding window
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#backoff-constant-or-exponential" class="md-nav__link">
-    <span class="md-ellipsis">
-      Backoff: constant or exponential
+      The flow
     </span>
   </a>
   
@@ -580,9 +533,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-concurrent-wrapper-reconciler" class="md-nav__link">
+  <a href="#the-concurrent-reconciler" class="md-nav__link">
     <span class="md-ellipsis">
-      The concurrent wrapper: Reconciler
+      The concurrent Reconciler
     </span>
   </a>
   
@@ -592,15 +545,6 @@
   <a href="#composing-with-supervisor" class="md-nav__link">
     <span class="md-ellipsis">
       Composing with supervisor
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#guarantees" class="md-nav__link">
-    <span class="md-ellipsis">
-      Guarantees
     </span>
   </a>
   
@@ -621,111 +565,108 @@
                   
 
 
-<h1 id="respawn-restart-state-machine">respawn — restart state machine<a class="headerlink" href="#respawn-restart-state-machine" title="Permanent link">&para;</a></h1>
-<p><code>github.com/go-proc/respawn</code> (package <code>respawn</code>) is a <strong>restart / reconcile
-state machine</strong>. Its core is a single pure function that decides whether — and
-when — a down unit should come back; that core is then wrapped in a concurrent,
-per-unit reconciler driven by liveness signals.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">&quot;github.com/go-proc/respawn&quot;</span>
+<h1 id="respawn-restart-reconcile-state-machine">respawn — restart / reconcile state machine<a class="headerlink" href="#respawn-restart-reconcile-state-machine" title="Permanent link">&para;</a></h1>
+<p><code>github.com/go-proc/respawn</code> decides <em>whether and when</em> to bring a unit back after
+it goes down — honouring anti-flap and anti-thrash limits — and effects the
+respawn through a caller-supplied interface. It is pure Go with <strong>zero</strong>
+dependencies.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/go-proc/respawn
 </code></pre></div>
-<p>Pure Go, <code>CGO_ENABLED=0</code>, dependency-free, 100% coverage, green on all six
-64-bit Go arches.</p>
-<h2 id="the-pure-core-decide">The pure core: <code>Decide</code><a class="headerlink" href="#the-pure-core-decide" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">plan</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">Decide</span><span class="p">(</span><span class="nx">policy</span><span class="p">,</span><span class="w"> </span><span class="nx">history</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="p">,</span><span class="w"> </span><span class="nx">now</span><span class="p">)</span>
-</code></pre></div>
-<p><code>Decide</code> is a <strong>pure function</strong> — no I/O, no goroutines, and <code>now</code> is a
-parameter rather than a call to the clock — so its every branch is unit-tested
-against fixed inputs. It maps <code>(policy, history, attempt, signal, now)</code> to a
-<code>Plan</code>:</p>
+<h2 id="the-signal-model">The signal model<a class="headerlink" href="#the-signal-model" title="Permanent link">&para;</a></h2>
+<p>You feed the machine a stream of signals per named unit:</p>
 <table>
 <thead>
 <tr>
-<th><code>Plan.Action</code></th>
+<th>Signal</th>
 <th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Restart</code></td>
-<td>bring the unit back, after <code>Plan.Delay</code> (the computed backoff)</td>
+<td><code>SignalDown</code></td>
+<td>the unit stopped (crash, eviction, operator action, host reboot)</td>
 </tr>
 <tr>
-<td><code>Debounce</code></td>
-<td>ignore for now — still inside the grace / anti-flap window</td>
+<td><code>SignalUp</code></td>
+<td>the unit is running again — resets transient counters</td>
 </tr>
 <tr>
-<td><code>GiveUp</code></td>
-<td>too many restarts in the sliding window; stop trying</td>
+<td><code>SignalUnhealthy</code></td>
+<td>a liveness probe failed past its threshold — a <em>soft</em> down</td>
 </tr>
 <tr>
-<td><code>None</code></td>
-<td>nothing to do (e.g. a <code>healthy</code>/<code>up</code> signal for an already-up unit)</td>
+<td><code>SignalHealthy</code></td>
+<td>the rolling probe verdict crossed back to healthy</td>
 </tr>
 </tbody>
 </table>
-<h3 id="signals">Signals<a class="headerlink" href="#signals" title="Permanent link">&para;</a></h3>
-<p>The state machine is driven by four signals:</p>
-<ul>
-<li><strong><code>down</code></strong> — the unit exited or was observed gone → candidate for restart.</li>
-<li><strong><code>up</code></strong> — the unit started successfully → resets the flap timer.</li>
-<li><strong><code>unhealthy</code></strong> — the unit is running but failing its health check → treated as
-  a soft-down for reconciliation.</li>
-<li><strong><code>healthy</code></strong> — the unit passed its health check again → clears the unhealthy
-  state.</li>
-</ul>
-<h3 id="anti-flap-grace-period-debounce">Anti-flap: grace-period debounce<a class="headerlink" href="#anti-flap-grace-period-debounce" title="Permanent link">&para;</a></h3>
-<p>A unit that flaps down-up-down within a short <strong>grace period</strong> should not trigger
-a restart storm. <code>Decide</code> debounces: a <code>down</code> inside the grace window since the
-last <code>up</code> returns <code>Debounce</code>, not <code>Restart</code>. Only once the unit has been stably
-up past the grace period is a subsequent <code>down</code> treated as a real restart.</p>
-<h3 id="anti-thrash-max_restarts-sliding-window">Anti-thrash: <code>max_restarts</code> sliding window<a class="headerlink" href="#anti-thrash-max_restarts-sliding-window" title="Permanent link">&para;</a></h3>
-<p>To stop a crash-loop from pinning a core, the policy carries a <code>max_restarts</code>
-budget over a sliding time <strong>window</strong>. <code>Decide</code> counts the restart timestamps in
-<code>history</code> that fall within <code>[now - window, now]</code>; if the budget is exhausted it
-returns <code>GiveUp</code> instead of <code>Restart</code>. Timestamps outside the window age out, so
-the budget continuously refreshes.</p>
-<h3 id="backoff-constant-or-exponential">Backoff: constant or exponential<a class="headerlink" href="#backoff-constant-or-exponential" title="Permanent link">&para;</a></h3>
-<p>When a restart <em>is</em> warranted, <code>Plan.Delay</code> is the backoff for this attempt:</p>
-<ul>
-<li><strong>constant</strong> — a fixed delay between attempts;</li>
-<li><strong>exponential</strong> — <code>base × factor^attempt</code>, clamped to a configured <code>max</code>, so
-  successive failures wait progressively longer.</li>
-</ul>
-<p>The <code>attempt</code> counter feeds the exponential curve; a successful <code>up</code> resets it.</p>
-<h2 id="the-concurrent-wrapper-reconciler">The concurrent wrapper: <code>Reconciler</code><a class="headerlink" href="#the-concurrent-wrapper-reconciler" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">NewReconciler</span><span class="p">(</span><span class="nx">policy</span><span class="p">,</span><span class="w"> </span><span class="nx">actions</span><span class="p">)</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nx">r</span><span class="p">.</span><span class="nx">Signal</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">unit</span><span class="p">,</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">SignalDown</span><span class="p">)</span><span class="w">   </span><span class="c1">// feed events in</span>
+<p>Health is a <strong>local <code>SignalKind</code></strong>, not an imported probe type — you decide what
+"unhealthy" means and emit the signal.</p>
+<h2 id="the-pure-decision-core">The pure decision core<a class="headerlink" href="#the-pure-decision-core" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">RespawnPolicy</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nx">Enabled</span><span class="w">        </span><span class="kt">bool</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nx">GracePeriodMs</span><span class="w">  </span><span class="kt">int64</span><span class="w">   </span><span class="c1">// debounce a flap before reacting</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nx">MaxRestarts</span><span class="w">    </span><span class="kt">int32</span><span class="w">   </span><span class="c1">// cap within...</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nx">WindowMs</span><span class="w">       </span><span class="kt">int64</span><span class="w">   </span><span class="c1">// ...this sliding window</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nx">Backoff</span><span class="w">        </span><span class="kt">string</span><span class="w">  </span><span class="c1">// &quot;constant&quot; | &quot;exponential&quot;</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nx">InitialDelayMs</span><span class="w"> </span><span class="kt">int64</span><span class="w">   </span><span class="c1">// doubles each retry when exponential (capped 5m)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Decide</span><span class="p">(</span><span class="nx">policy</span><span class="w"> </span><span class="o">*</span><span class="nx">RespawnPolicy</span><span class="p">,</span><span class="w"> </span><span class="nx">h</span><span class="w"> </span><span class="o">*</span><span class="nx">History</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">sig</span><span class="w"> </span><span class="nx">Signal</span><span class="p">,</span><span class="w"> </span><span class="nx">now</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="p">)</span><span class="w"> </span><span class="nx">Plan</span>
 </code></pre></div>
-<p>The <code>Reconciler</code> owns the per-unit state (history, attempt, last-up time),
-serializes signals for each unit, calls <code>Decide</code>, and then carries out the
-resulting <code>Plan</code> through a caller-supplied <code>Actions</code> interface:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Actions</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nx">Start</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">unit</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w">   </span><span class="c1">// execute a Restart plan</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nx">GiveUp</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">unit</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w">         </span><span class="c1">// a unit exceeded its budget</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+<p><code>Decide</code> is an allocation-light pure function: given the policy, the per-unit
+restart <code>History</code>, the incoming signal, and the current time, it returns a <code>Plan</code>
+value describing what to do — no goroutines, no real sleeps. That makes every
+decision assertable against a fixed clock.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Plan</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">State</span><span class="w">    </span><span class="nx">State</span><span class="w">         </span><span class="c1">// running | grace_wait | backoff | respawning | cooldown | stopped</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">Action</span><span class="w">   </span><span class="nx">Action</span><span class="w">        </span><span class="c1">// none | start | stop | wait</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nx">DelayFor</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w">  </span><span class="c1">// how long to wait (backoff / grace / cooldown)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nx">Reason</span><span class="w">   </span><span class="kt">string</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span>
 </code></pre></div>
-<p>Concurrency and effects live here; the <em>logic</em> lives in <code>Decide</code>. That separation
-is why the reconciler's plumbing and the decision rules can each be tested in
-isolation, and why the whole module reaches 100% coverage without timing flakes —
-the delay/window logic is exercised through injected <code>now</code> values, not real
-sleeps.</p>
-<h2 id="composing-with-supervisor">Composing with <code>supervisor</code><a class="headerlink" href="#composing-with-supervisor" title="Permanent link">&para;</a></h2>
-<p><a href="../supervisor/"><code>supervisor</code></a> answers <em>"did this process exit, and who owned
-it?"</em>; <code>respawn</code> answers <em>"given that it's down, should it come back, and
-when?"</em>. A supervisor can hand each observed exit to a <code>Reconciler</code> as a <code>down</code>
-signal and let <code>respawn</code> own the debounce / anti-thrash / backoff decision,
-keeping the OS-facing reaper free of any restart policy.</p>
-<h2 id="guarantees">Guarantees<a class="headerlink" href="#guarantees" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Pure decision core</strong> — <code>Decide</code> is a pure function of its arguments; <code>now</code> is
-  passed in, so tests are deterministic.</li>
-<li><strong>Pure Go / <code>CGO_ENABLED=0</code></strong> — static binary, dependency-free.</li>
-<li><strong>100% coverage</strong> including every debounce / give-up / backoff branch.</li>
-<li><strong>Six-arch clean</strong> — CI-green on amd64, arm64, riscv64, loong64, ppc64le,
-  s390x.</li>
-</ul>
-<p>See <a href="../why/">Why these primitives</a> for why the decision is deliberately a pure
-function separated from the reaper.</p>
+<h3 id="the-flow">The flow<a class="headerlink" href="#the-flow" title="Permanent link">&para;</a></h3>
+<ol>
+<li>A <code>down</code>/<code>unhealthy</code> signal first parks in <strong><code>grace_wait</code></strong> for
+   <code>GracePeriodMs</code>, so a flap that self-heals never triggers a restart.</li>
+<li>After grace, if <code>MaxRestarts</code> within the rolling <code>WindowMs</code> is <strong>not</strong>
+   exhausted, the plan is a <strong><code>start</code></strong> (or <strong><code>stop</code></strong>-then-start for an
+   <code>unhealthy</code> unit), preceded by <strong>backoff</strong>.</li>
+<li>If the restart budget <strong>is</strong> exhausted, the unit moves to <strong><code>cooldown</code></strong> until
+   the window rolls.</li>
+</ol>
+<p><code>unhealthy</code> is recovered as stop-then-start because the guest is nominally still
+running — the policy does not trust it to recover on its own.</p>
+<h2 id="the-concurrent-reconciler">The concurrent Reconciler<a class="headerlink" href="#the-concurrent-reconciler" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">myActions</span><span class="p">,</span><span class="w"> </span><span class="nx">log</span><span class="p">)</span><span class="w">      </span><span class="c1">// log may be nil</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cancel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">WithCancel</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">())</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">defer</span><span class="w"> </span><span class="nx">cancel</span><span class="p">()</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nx">r</span><span class="p">.</span><span class="nx">Watch</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;web-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">policy</span><span class="p">)</span><span class="w">          </span><span class="c1">// one goroutine per unit, lazily started</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nx">r</span><span class="p">.</span><span class="nx">Send</span><span class="p">(</span><span class="nx">respawn</span><span class="p">.</span><span class="nx">Signal</span><span class="p">{</span><span class="nx">VMName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;web-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Kind</span><span class="p">:</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">SignalDown</span><span class="p">,</span><span class="w"> </span><span class="nx">When</span><span class="p">:</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()})</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nx">cancel</span><span class="p">();</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span><span class="w">                     </span><span class="c1">// drain on shutdown</span>
+</code></pre></div>
+<p>The <code>Reconciler</code> is the thin concurrent shell around <code>Decide</code>: one goroutine per
+watched unit draining a buffered signal channel, fanning out across units by name
+so distinct units never serialise. It effects plans through your <code>Actions</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">VMActions</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nx">StartVM</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nx">StopVM</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Naming</p>
+<p>The <code>Actions</code> methods and <code>Signal.VMName</code> keep the <code>VM</code> names of the origin
+codebase, but the package is <strong>unit-agnostic</strong> — a "VM" here is any named
+thing you supervise (a process, a container, a service).</p>
+</div>
+<h2 id="composing-with-supervisor">Composing with supervisor<a class="headerlink" href="#composing-with-supervisor" title="Permanent link">&para;</a></h2>
+<p><code>supervisor</code> answers "a process I launched exited — apply its <code>RestartPolicy</code>" at
+the OS level. <code>respawn</code> answers the higher-level "given health/liveness signals
+over time, <em>should</em> I respawn this unit, and how fast" — with debounce,
+thrash limits, and backoff. Use <code>supervisor</code> for the local process tree, <code>respawn</code>
+when restart decisions need memory and rate-limiting.</p>
 
 
 

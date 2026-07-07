@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Pure-Go (CGO-free) process-lifecycle primitives: a PID-1 subreaper and process supervisor, and a restart/reconcile state machine.">
+        <meta name="description" content="Pure-Go (no cgo) process-lifecycle primitives: a PID-1 subreaper + process supervisor and a restart/reconcile state machine.">
       
       
       
@@ -47,8 +47,6 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="assets/extra.css">
     
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -138,7 +136,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -148,7 +146,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
     
       <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -315,36 +313,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-two-primitives" class="md-nav__link">
+  <a href="#reap-supervise-respawn" class="md-nav__link">
     <span class="md-ellipsis">
-      The two primitives
+      Reap, supervise, respawn
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#design-in-one-line" class="md-nav__link">
+  <a href="#install" class="md-nav__link">
     <span class="md-ellipsis">
-      Design in one line
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-taste" class="md-nav__link">
-    <span class="md-ellipsis">
-      Quick taste
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#repositories" class="md-nav__link">
-    <span class="md-ellipsis">
-      Repositories
+      Install
     </span>
   </a>
   
@@ -387,7 +367,7 @@
         
   
   <span class="md-ellipsis">
-    Why these primitives
+    Design — reap, supervise, respawn
   </span>
   
 
@@ -407,7 +387,7 @@
         
   
   <span class="md-ellipsis">
-    supervisor — reap & supervise
+    supervisor — subreaper + supervisor
   </span>
   
 
@@ -503,36 +483,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-two-primitives" class="md-nav__link">
+  <a href="#reap-supervise-respawn" class="md-nav__link">
     <span class="md-ellipsis">
-      The two primitives
+      Reap, supervise, respawn
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#design-in-one-line" class="md-nav__link">
+  <a href="#install" class="md-nav__link">
     <span class="md-ellipsis">
-      Design in one line
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-taste" class="md-nav__link">
-    <span class="md-ellipsis">
-      Quick taste
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#repositories" class="md-nav__link">
-    <span class="md-ellipsis">
-      Repositories
+      Install
     </span>
   </a>
   
@@ -572,126 +534,89 @@
 
 
 <h1 id="go-proc-documentation">go-proc documentation<a class="headerlink" href="#go-proc-documentation" title="Permanent link">&para;</a></h1>
-<p><strong>Pure-Go (CGO-free) process-lifecycle primitives</strong> — <em>reap, supervise,
-respawn.</em> A small family of dependency-free Go libraries, extracted and
-generalized from a microVM init, that answer the three questions any
-long-running init has to answer: <em>who reaps the orphans, who keeps the workload
-up, and when should a crash actually restart.</em></p>
+<p><strong>Pure-Go (no cgo) process-lifecycle primitives</strong> — the small, reusable pieces an
+init or a workload manager needs: a PID-1 subreaper, a process supervisor, and a
+restart/reconcile state machine. Extracted from a microVM init and <strong>generalized</strong>
+to depend on no particular workload model, transport, or scheduler.</p>
+<p>Two libraries:</p>
+<ul>
+<li><a href="https://github.com/go-proc/supervisor"><code>github.com/go-proc/supervisor</code></a> — a
+  <strong>PID-1 subreaper</strong> (<code>SIGCHLD</code> + <code>Wait4</code>, Linux, with a portable no-op stub
+  elsewhere) <strong>and</strong> a <strong>process supervisor</strong> that drives a pluggable <code>Runtime</code>
+  over a <code>Spec</code> of <code>Proc</code>s and restarts them per <code>RestartPolicy</code>.</li>
+<li><a href="https://github.com/go-proc/respawn"><code>github.com/go-proc/respawn</code></a> — a
+  <strong>restart / reconcile state machine</strong>: grace-period debounce, sliding-window
+  anti-thrash, and constant/exponential backoff, driven by
+  <code>down</code>/<code>up</code>/<code>unhealthy</code>/<code>healthy</code> signals.</li>
+</ul>
 <div class="admonition success">
-<p class="admonition-title">Status: both primitives shipping</p>
-<p><a href="supervisor/"><code>supervisor</code></a> provides a <strong>PID-1 subreaper</strong> and a
-<strong>policy-driven process supervisor</strong>; <a href="respawn/"><code>respawn</code></a> provides the
-<strong>debounce / anti-thrash / backoff decision core</strong> and its concurrent
-reconciler. Both are pure Go with <code>CGO_ENABLED=0</code>, dependency-free, at 100%
-coverage, and CI-green across the six 64-bit Go targets (amd64, arm64,
-riscv64, loong64, ppc64le, s390x).</p>
+<p class="admonition-title">Status: both primitives shipped</p>
+<p><code>supervisor</code> and <code>respawn</code> are released at <strong>100% test coverage</strong> (error
+branches included), race-tested, <code>gofmt</code> + <code>go vet</code> clean, CI green across the
+six 64-bit Go targets — amd64, arm64, riscv64, loong64, ppc64le, s390x. The
+Linux-only subreaper sits behind a build tag with a portable stub, so
+<code>go build</code> / <code>go vet</code> stay green on macOS and Windows too.</p>
 </div>
-<h2 id="the-two-primitives">The two primitives<a class="headerlink" href="#the-two-primitives" title="Permanent link">&para;</a></h2>
+<h2 id="reap-supervise-respawn">Reap, supervise, respawn<a class="headerlink" href="#reap-supervise-respawn" title="Permanent link">&para;</a></h2>
+<p>Each library owns a distinct slice of process lifecycle:</p>
 <table>
 <thead>
 <tr>
-<th>Module</th>
-<th>Import path</th>
-<th>What it does</th>
+<th>Concern</th>
+<th>Library</th>
+<th>Shape</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>supervisor</strong></td>
-<td><code>github.com/go-proc/supervisor</code></td>
-<td>A <strong>subreaper</strong> (SIGCHLD + <code>Wait4</code> on Linux, portable no-op stub elsewhere) that adopts and reaps orphaned children, plus a <strong>supervisor</strong> that drives a pluggable <code>Runtime</code> over a <code>Spec</code> of <code>Proc</code>s and restarts each per its <code>RestartPolicy</code> (<code>Never</code> / <code>OnFailure</code> / <code>Always</code>), correlating every exit back to the process that owns it.</td>
+<td><strong>Reap</strong> orphaned children (PID 1's job)</td>
+<td><code>supervisor</code></td>
+<td><code>Reaper</code> — <code>SIGCHLD</code> + <code>Wait4(-1, WNOHANG)</code></td>
 </tr>
 <tr>
-<td><strong>respawn</strong></td>
-<td><code>github.com/go-proc/respawn</code></td>
-<td>A <strong>restart / reconcile state machine</strong>: a pure <code>Decide(policy, history, attempt, signal, now) → Plan</code> core — grace-period debounce (anti-flap), <code>max_restarts</code> sliding-window anti-thrash, constant / exponential backoff — wrapped in a concurrent per-unit <code>Reconciler</code> driven by down / up / unhealthy / healthy signals through a caller-supplied <code>Actions</code> interface.</td>
+<td><strong>Supervise</strong> declared processes</td>
+<td><code>supervisor</code></td>
+<td><code>Supervisor</code> over a <code>Runtime</code> + <code>Spec</code></td>
+</tr>
+<tr>
+<td><strong>Respawn</strong> on failure, without thrashing</td>
+<td><code>respawn</code></td>
+<td><code>Decide</code> state machine + <code>Reconciler</code></td>
 </tr>
 </tbody>
 </table>
-<p>The two compose: <code>supervisor</code> owns the OS-level reaping and process running,
-while <code>respawn</code> owns the <em>decision</em> of whether and when a down process should
-come back. Either can be used on its own.</p>
-<h2 id="design-in-one-line">Design in one line<a class="headerlink" href="#design-in-one-line" title="Permanent link">&para;</a></h2>
-<blockquote>
-<p><strong><code>supervisor</code> reaps and runs; <code>respawn</code> decides.</strong></p>
-</blockquote>
-<p>The restart decision is a <strong>pure function</strong> of policy and history, so it is
-tested exhaustively without spawning a single process; the OS-facing reaper is
-isolated behind build-tagged files with fault-injection seams. See
-<a href="why/">Why these primitives</a> for the full rationale.</p>
-<h2 id="quick-taste">Quick taste<a class="headerlink" href="#quick-taste" title="Permanent link">&para;</a></h2>
-<p><code>supervisor</code> — become a subreaper and supervise a spec:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">stop</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">StartReaper</span><span class="p">()</span><span class="w">   </span><span class="c1">// Linux: PR_SET_CHILD_SUBREAPER + SIGCHLD/Wait4</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">defer</span><span class="w"> </span><span class="nx">stop</span><span class="p">()</span><span class="w">                       </span><span class="c1">// elsewhere: portable no-op</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nx">sup</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">runtime</span><span class="p">,</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Spec</span><span class="p">{</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nx">Procs</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Proc</span><span class="p">{</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Restart</span><span class="p">:</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Always</span><span class="p">},</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;batch&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Restart</span><span class="p">:</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">OnFailure</span><span class="p">},</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">})</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nx">sup</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w">                        </span><span class="c1">// starts, watches, restarts per policy</span>
+<p>The subreaper and supervisor are two responsibilities split on purpose: the
+reaper runs <strong>unconditionally</strong> (PID 1 is the kernel's reaper of last resort for
+the whole orphan tree, including helpers a runtime forks that you never tracked),
+while the supervisor only cares about the PIDs it launched. <code>respawn</code> sits a layer
+up: given a stream of health/liveness signals, it decides <em>whether and when</em> to
+bring a unit back, honouring anti-flap and anti-thrash limits.</p>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/go-proc/supervisor
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/go-proc/respawn
 </code></pre></div>
-<p><code>respawn</code> — decide whether a down unit should restart:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">plan</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">Decide</span><span class="p">(</span><span class="nx">policy</span><span class="p">,</span><span class="w"> </span><span class="nx">history</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">SignalDown</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">())</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">switch</span><span class="w"> </span><span class="nx">plan</span><span class="p">.</span><span class="nx">Action</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">case</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">Restart</span><span class="p">:</span><span class="w">  </span><span class="c1">// after plan.Delay (backoff)</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">case</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">Debounce</span><span class="p">:</span><span class="w"> </span><span class="c1">// still inside the grace window</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">case</span><span class="w"> </span><span class="nx">respawn</span><span class="p">.</span><span class="nx">GiveUp</span><span class="p">:</span><span class="w">   </span><span class="c1">// max_restarts exceeded in the window</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">}</span>
-</code></pre></div>
-<h2 id="repositories">Repositories<a class="headerlink" href="#repositories" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Repo</th>
-<th>What it is</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="https://github.com/go-proc/supervisor"><code>supervisor</code></a></td>
-<td>the subreaper + process supervisor (<a href="https://pkg.go.dev/github.com/go-proc/supervisor">pkg.go.dev</a>)</td>
-</tr>
-<tr>
-<td><a href="https://github.com/go-proc/respawn"><code>respawn</code></a></td>
-<td>the restart / reconcile state machine (<a href="https://pkg.go.dev/github.com/go-proc/respawn">pkg.go.dev</a>)</td>
-</tr>
-<tr>
-<td><a href="https://github.com/go-proc/docs"><code>docs</code></a></td>
-<td>this documentation site (MkDocs Material, versioned with mike)</td>
-</tr>
-<tr>
-<td><a href="https://github.com/go-proc/go-proc.github.io"><code>go-proc.github.io</code></a></td>
-<td>the organization landing page (Hugo)</td>
-</tr>
-<tr>
-<td><a href="https://github.com/go-proc/brand"><code>brand</code></a></td>
-<td>logo and brand assets</td>
-</tr>
-</tbody>
-</table>
 <h2 id="principles">Principles<a class="headerlink" href="#principles" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Pure Go, <code>CGO_ENABLED=0</code></strong> — trivial cross-compilation, a single static
-  binary, no C toolchain. Linux-only syscalls sit behind build tags with a
-  portable no-op stub.</li>
-<li><strong>Mechanism, not policy engine.</strong> Reaping and running are separated from the
-  restart <em>decision</em>; the decision is a pure, exhaustively-testable function.</li>
-<li><strong>Dependency-free.</strong> No third-party imports — only the standard library.</li>
-<li><strong>100% test coverage</strong> is the target, enforced as a CI gate, error branches
-  included.</li>
+  binary, no C toolchain. Platform-specific syscalls live behind build tags.</li>
+<li><strong>Generic seams.</strong> A six-method <code>Runtime</code> interface, a two-method <code>Actions</code>
+  interface, and local value types are the only coupling points — no weft, gRPC,
+  or health-checker imports.</li>
+<li><strong>A pure decision core.</strong> Scheduling is a pure function of
+  <code>(policy, history, signal, now)</code>; concurrency is a thin shell around it.</li>
+<li><strong>100% test coverage</strong>, including every error branch, enforced as a CI gate.</li>
 </ul>
 <h2 id="where-to-go-next">Where to go next<a class="headerlink" href="#where-to-go-next" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="why/">Why these primitives</a> — the reap / supervise / respawn split and why
-  the decision core is a pure function.</li>
-<li><a href="supervisor/">supervisor — reap &amp; supervise</a> — the subreaper, <code>Runtime</code>,
-  <code>Spec</code>, <code>Proc</code>, <code>RestartPolicy</code>.</li>
-<li><a href="respawn/">respawn — restart state machine</a> — <code>Decide</code>, <code>Plan</code>, backoff,
-  the anti-thrash window, and the <code>Reconciler</code>.</li>
-<li><a href="roadmap/">Roadmap</a> — what is shipping and what is out of scope.</li>
+<li><a href="why/">Design — reap, supervise, respawn</a> — why the three concerns are split,
+  and how portability is preserved.</li>
+<li><a href="supervisor/">supervisor</a> — the subreaper, the <code>Runtime</code> interface, restart
+  policies, and clean shutdown.</li>
+<li><a href="respawn/">respawn</a> — the signal model, the <code>Decide</code> core, and the
+  <code>Reconciler</code>.</li>
+<li><a href="roadmap/">Roadmap</a> — what is done and what could come next.</li>
 </ul>
+<p>Source lives at <a href="https://github.com/go-proc">github.com/go-proc</a>.</p>
 
 
 

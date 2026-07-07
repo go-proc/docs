@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Pure-Go (CGO-free) process-lifecycle primitives: a PID-1 subreaper and process supervisor, and a restart/reconcile state machine.">
+        <meta name="description" content="Pure-Go (no cgo) process-lifecycle primitives: a PID-1 subreaper + process supervisor and a restart/reconcile state machine.">
       
       
       
@@ -47,8 +47,6 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="../assets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -138,7 +136,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -148,7 +146,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
     
       <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -293,7 +291,7 @@
         
   
   <span class="md-ellipsis">
-    Why these primitives
+    Design — reap, supervise, respawn
   </span>
   
 
@@ -313,7 +311,7 @@
         
   
   <span class="md-ellipsis">
-    supervisor — reap & supervise
+    supervisor — subreaper + supervisor
   </span>
   
 
@@ -415,27 +413,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#hard-rules" class="md-nav__link">
+  <a href="#ground-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      Hard rules
+      Ground rules
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#workflow" class="md-nav__link">
+  <a href="#running-the-checks-locally" class="md-nav__link">
     <span class="md-ellipsis">
-      Workflow
+      Running the checks locally
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-things-live" class="md-nav__link">
+  <a href="#cross-arch" class="md-nav__link">
     <span class="md-ellipsis">
-      Where things live
+      Cross-arch
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
     </span>
   </a>
   
@@ -476,27 +483,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#hard-rules" class="md-nav__link">
+  <a href="#ground-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      Hard rules
+      Ground rules
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#workflow" class="md-nav__link">
+  <a href="#running-the-checks-locally" class="md-nav__link">
     <span class="md-ellipsis">
-      Workflow
+      Running the checks locally
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-things-live" class="md-nav__link">
+  <a href="#cross-arch" class="md-nav__link">
     <span class="md-ellipsis">
-      Where things live
+      Cross-arch
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
     </span>
   </a>
   
@@ -518,73 +534,45 @@
 
 
 <h1 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h1>
-<p>Contributions are welcome. go-proc is built to a small set of non-negotiable
-rules — they are what keep the primitives pure-Go, correct, and portable. Please
-read these before opening a pull request.</p>
-<h2 id="hard-rules">Hard rules<a class="headerlink" href="#hard-rules" title="Permanent link">&para;</a></h2>
+<p>Contributions are welcome on either library
+(<a href="https://github.com/go-proc/supervisor">supervisor</a>,
+<a href="https://github.com/go-proc/respawn">respawn</a>).</p>
+<h2 id="ground-rules">Ground rules<a class="headerlink" href="#ground-rules" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Build from source — no vendoring.</strong> Everything compiles from source. Do not
-  reach for prebuilt binaries or vendored blobs as a shortcut; being able to
-  compile from source is a guarantee of independence.</li>
-<li><strong>Pure Go, cgo disabled.</strong> The whole point is a single static binary with no C
-  toolchain. Code must build with <code>CGO_ENABLED=0</code>. Linux-only syscalls
-  (<code>Wait4</code>, subreaper <code>prctl</code>) go in build-tagged files with a portable no-op
-  stub for every other GOOS — never a cgo shim.</li>
-<li><strong>Dependency-free.</strong> Only the standard library (and, on Linux, the low-level
-  syscall surface). New third-party dependencies need a strong justification.</li>
-<li><strong>100% test coverage target, enforced in CI.</strong> New code ships with tests, and
-  coverage is a CI gate. Fill the error branches, not just the happy path — use
-  the <code>Runtime</code> / <code>Actions</code> interfaces and the reaper stub as fault-injection
-  seams.</li>
-<li><strong>Keep the decision pure.</strong> <code>respawn.Decide</code> must stay a pure function — no
-  I/O, no goroutines, <code>now</code> passed in. Timing, concurrency and effects belong in
-  the <code>Reconciler</code> / <code>Actions</code>, not the decision core.</li>
-<li><strong>All GitHub content in English.</strong> Issues, pull requests, commits, comments and
-  discussions are English-only.</li>
-<li><strong>Six-arch clean.</strong> Changes must stay <code>gofmt</code> + <code>go vet</code> clean and green across
-  amd64, arm64, riscv64, loong64, ppc64le and s390x.</li>
+<li><strong>Pure Go, <code>CGO_ENABLED=0</code>.</strong> No cgo, no third-party dependencies in the core.
+  Platform-specific code goes behind a build tag with a portable stub so
+  <code>go build</code> / <code>go vet</code> stay green on every OS.</li>
+<li><strong>100% test coverage</strong>, error branches included, is a <strong>CI gate</strong>. New code
+  ships with tests that cover it — the pipeline fails below 100%.</li>
+<li><strong><code>gofmt</code> + <code>go vet</code> clean</strong>, and <code>-race</code> clean.</li>
+<li><strong>BSD-3-Clause</strong>, English-only in all public content (issues, PRs, commits).</li>
 </ul>
-<h2 id="workflow">Workflow<a class="headerlink" href="#workflow" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Pick or open an issue describing the change.</li>
-<li>Work test-first: add the unit tests (drive branches through the interfaces and
-   injected <code>now</code>), then make them pass.</li>
-<li>
-<p>Run the full suite with coverage and confirm the gate is green:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">COVERPKG</span><span class="o">=</span><span class="k">$(</span>go<span class="w"> </span>list<span class="w"> </span>./...<span class="w"> </span><span class="p">|</span><span class="w"> </span>paste<span class="w"> </span>-sd,<span class="w"> </span>-<span class="k">)</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-race<span class="w"> </span>-coverpkg<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$COVERPKG</span><span class="s2">&quot;</span><span class="w"> </span>-coverprofile<span class="o">=</span>cover.out<span class="w"> </span>./...
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>go<span class="w"> </span>tool<span class="w"> </span>cover<span class="w"> </span>-func<span class="o">=</span>cover.out<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-1<span class="w">   </span><span class="c1"># 100.0%</span>
+<h2 id="running-the-checks-locally">Running the checks locally<a class="headerlink" href="#running-the-checks-locally" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>vet<span class="w"> </span>./...
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>go<span class="w"> </span>build<span class="w"> </span>./...
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nv">COVERPKG</span><span class="o">=</span><span class="k">$(</span>go<span class="w"> </span>list<span class="w"> </span>./...<span class="w"> </span><span class="p">|</span><span class="w"> </span>paste<span class="w"> </span>-sd,<span class="w"> </span>-<span class="k">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-race<span class="w"> </span>-coverpkg<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$COVERPKG</span><span class="s2">&quot;</span><span class="w"> </span>-coverprofile<span class="o">=</span>cover.out<span class="w"> </span>./...
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>go<span class="w"> </span>tool<span class="w"> </span>cover<span class="w"> </span>-func<span class="o">=</span>cover.out<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-1<span class="w">   </span><span class="c1"># must read 100.0%</span>
 </code></pre></div>
-</li>
-<li>
-<p>Open a PR in English, referencing the issue.</p>
-</li>
-</ol>
-<h2 id="where-things-live">Where things live<a class="headerlink" href="#where-things-live" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Module</th>
-<th>Repo</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>subreaper + process supervisor</td>
-<td><a href="https://github.com/go-proc/supervisor"><code>github.com/go-proc/supervisor</code></a></td>
-</tr>
-<tr>
-<td>restart / reconcile state machine</td>
-<td><a href="https://github.com/go-proc/respawn"><code>github.com/go-proc/respawn</code></a></td>
-</tr>
-<tr>
-<td>this documentation site</td>
-<td><a href="https://github.com/go-proc/docs"><code>github.com/go-proc/docs</code></a></td>
-</tr>
-</tbody>
-</table>
-<p>Start from <a href="../supervisor/">supervisor</a> / <a href="../respawn/">respawn</a> and the
-<a href="../roadmap/">Roadmap</a> to find the right place for your change.</p>
+<div class="admonition note">
+<p class="admonition-title">Coverage of the Linux subreaper</p>
+<p>In <code>supervisor</code>, the subreaper's <code>SIGCHLD</code> + <code>Wait4</code> path is Linux-only, so
+the coverage gate is measured on the native Linux lane — that is where the
+reaper is both compiled and exercised. Its <code>drain</code> loop is driven
+deterministically through a <code>wait4</code> seam (exit / signal / error / buffer-full
+cases) plus a real <code>SIGCHLD</code> delivery test that skips itself under qemu-user.
+macOS/Windows lanes cover the portable supervisor logic.</p>
+</div>
+<h2 id="cross-arch">Cross-arch<a class="headerlink" href="#cross-arch" title="Permanent link">&para;</a></h2>
+<p>CI runs the suite natively on amd64/arm64 and under qemu-user on riscv64,
+loong64, ppc64le, and s390x. Keep new code arch-neutral; if a test needs native
+syscalls, gate it so the qemu lanes stay green.</p>
+<h2 id="docs">Docs<a class="headerlink" href="#docs" title="Permanent link">&para;</a></h2>
+<p>These docs are MkDocs Material, versioned with <a href="https://github.com/jimporter/mike">mike</a>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>.<span class="w"> </span>.venv/bin/activate
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>mkdocs<span class="w"> </span>serve<span class="w">   </span><span class="c1"># http://localhost:8000</span>
+</code></pre></div>
 
 
 

@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Pure-Go (CGO-free) process-lifecycle primitives: a PID-1 subreaper and process supervisor, and a restart/reconcile state machine.">
+        <meta name="description" content="Pure-Go (no cgo) process-lifecycle primitives: a PID-1 subreaper + process supervisor and a restart/reconcile state machine.">
       
       
       
@@ -24,7 +24,7 @@
     
     
       
-        <title>Why these primitives - go-proc docs</title>
+        <title>Design — reap, supervise, respawn - go-proc docs</title>
       
     
     
@@ -49,8 +49,6 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="../assets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -78,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#why-these-primitives" class="md-skip">
+        <a href="#design-reap-supervise-respawn" class="md-skip">
           Skip to content
         </a>
       
@@ -117,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Why these primitives
+              Design — reap, supervise, respawn
             
           </span>
         </div>
@@ -140,7 +138,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -150,7 +148,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
     
       <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -304,7 +302,7 @@
           
   
   <span class="md-ellipsis">
-    Why these primitives
+    Design — reap, supervise, respawn
   </span>
   
 
@@ -315,7 +313,7 @@
         
   
   <span class="md-ellipsis">
-    Why these primitives
+    Design — reap, supervise, respawn
   </span>
   
 
@@ -337,36 +335,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#reap-the-subreaper" class="md-nav__link">
+  <a href="#1-reaping-is-unconditional" class="md-nav__link">
     <span class="md-ellipsis">
-      Reap: the subreaper
+      1. Reaping is unconditional
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#supervise-driving-a-spec-over-a-pluggable-runtime" class="md-nav__link">
+  <a href="#2-supervising-is-selective" class="md-nav__link">
     <span class="md-ellipsis">
-      Supervise: driving a spec over a pluggable runtime
+      2. Supervising is selective
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#respawn-the-decision-is-a-pure-function" class="md-nav__link">
+  <a href="#3-respawning-is-a-decision-not-a-reflex" class="md-nav__link">
     <span class="md-ellipsis">
-      Respawn: the decision is a pure function
+      3. Respawning is a decision, not a reflex
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-pure-go-matters-here" class="md-nav__link">
+  <a href="#why-no-weft-grpc-or-health-checker-dependency" class="md-nav__link">
     <span class="md-ellipsis">
-      Why pure Go matters here
+      Why no weft, gRPC, or health-checker dependency
     </span>
   </a>
   
@@ -391,7 +389,7 @@
         
   
   <span class="md-ellipsis">
-    supervisor — reap & supervise
+    supervisor — subreaper + supervisor
   </span>
   
 
@@ -487,36 +485,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#reap-the-subreaper" class="md-nav__link">
+  <a href="#1-reaping-is-unconditional" class="md-nav__link">
     <span class="md-ellipsis">
-      Reap: the subreaper
+      1. Reaping is unconditional
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#supervise-driving-a-spec-over-a-pluggable-runtime" class="md-nav__link">
+  <a href="#2-supervising-is-selective" class="md-nav__link">
     <span class="md-ellipsis">
-      Supervise: driving a spec over a pluggable runtime
+      2. Supervising is selective
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#respawn-the-decision-is-a-pure-function" class="md-nav__link">
+  <a href="#3-respawning-is-a-decision-not-a-reflex" class="md-nav__link">
     <span class="md-ellipsis">
-      Respawn: the decision is a pure function
+      3. Respawning is a decision, not a reflex
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-pure-go-matters-here" class="md-nav__link">
+  <a href="#why-no-weft-grpc-or-health-checker-dependency" class="md-nav__link">
     <span class="md-ellipsis">
-      Why pure Go matters here
+      Why no weft, gRPC, or health-checker dependency
     </span>
   </a>
   
@@ -537,79 +535,64 @@
                   
 
 
-<h1 id="why-these-primitives">Why these primitives<a class="headerlink" href="#why-these-primitives" title="Permanent link">&para;</a></h1>
-<p>Every long-running init or supervisor — a microVM PID 1, a container entrypoint,
-a service manager — has to answer three separate questions:</p>
-<ol>
-<li><strong>Who reaps the orphans?</strong> When a process re-parents its children to PID 1 and
-   then those children exit, someone must <code>wait()</code> on them or they become
-   zombies forever.</li>
-<li><strong>Who keeps the workload up?</strong> When a supervised process exits, someone must
-   notice, correlate the exit to the right workload, and decide whether to run it
-   again.</li>
-<li><strong>When should a crash actually restart?</strong> Restarting <em>immediately, always</em> is
-   how you get a crash-loop that pins a core. The real answer is a policy:
-   debounce brief flaps, back off, and give up after too many restarts in a
-   window.</li>
-</ol>
-<p>go-proc splits these cleanly. <strong><code>supervisor</code></strong> owns questions 1 and 2 — the
-OS-facing reaping and the process running. <strong><code>respawn</code></strong> owns question 3 — the
-<em>decision</em>, as a pure function. The split is the whole point: it lets the tricky,
-timing-sensitive restart logic be tested exhaustively and deterministically,
-with no processes and no clock, while the syscall-bound reaper stays small and
-isolated.</p>
-<h2 id="reap-the-subreaper">Reap: the subreaper<a class="headerlink" href="#reap-the-subreaper" title="Permanent link">&para;</a></h2>
-<p>On Linux, <code>supervisor.StartReaper()</code> marks the current process as a <strong>child
-subreaper</strong> (<code>PR_SET_CHILD_SUBREAPER</code>) and installs a <code>SIGCHLD</code> handler that
-loops <code>Wait4(-1, …, WNOHANG, …)</code> to harvest every exited child — both the
-processes it started and the orphans re-parented to it. Exits it recognizes are
-routed back to the supervisor so the owning <code>Proc</code> learns its child is gone;
-unknown PIDs (true orphans) are simply reaped and discarded.</p>
-<p>The syscalls are Linux-only, so they live in build-tagged files
-(<code>*_linux.go</code>) with a <strong>portable no-op stub</strong> for every other GOOS. That is what
-lets the package build, test, and reach 100% coverage on macOS and Windows CI
-lanes while the real reaping is exercised on Linux.</p>
-<blockquote>
-<p><strong>The reaper is a mechanism.</strong> It has no opinion about restarts — it turns OS
-signals into "process N exited with status S" facts and hands them upward.</p>
-</blockquote>
-<h2 id="supervise-driving-a-spec-over-a-pluggable-runtime">Supervise: driving a spec over a pluggable runtime<a class="headerlink" href="#supervise-driving-a-spec-over-a-pluggable-runtime" title="Permanent link">&para;</a></h2>
-<p><code>supervisor.New(runtime, spec)</code> takes a <code>Spec</code> — a set of named <code>Proc</code>s, each
-with its own <code>RestartPolicy</code> (<code>Never</code>, <code>OnFailure</code>, <code>Always</code>) — and a pluggable
-<code>Runtime</code> (the thing that actually starts and stops a process). It starts each
-proc, watches for exits via the reaper, and applies the policy. Because the
-<code>Runtime</code> is an interface, the same supervisor drives real OS processes in
-production and a fake, deterministic runtime in tests — no forking required to
-reach full branch coverage.</p>
-<h2 id="respawn-the-decision-is-a-pure-function">Respawn: the decision is a pure function<a class="headerlink" href="#respawn-the-decision-is-a-pure-function" title="Permanent link">&para;</a></h2>
-<p>The restart <em>policy</em> is deliberately <strong>not</strong> in <code>supervisor</code>. It is a standalone
-module, <code>respawn</code>, whose core is one pure function:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">Decide</span><span class="p">(</span><span class="nx">policy</span><span class="p">,</span><span class="w"> </span><span class="nx">history</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="p">,</span><span class="w"> </span><span class="nx">now</span><span class="p">)</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">Plan</span>
+<h1 id="design-reap-supervise-respawn">Design — reap, supervise, respawn<a class="headerlink" href="#design-reap-supervise-respawn" title="Permanent link">&para;</a></h1>
+<p>go-proc splits process lifecycle into three concerns that are usually tangled
+together in an init or an agent. Keeping them separate is what makes each piece
+small, testable, and reusable.</p>
+<h2 id="1-reaping-is-unconditional">1. Reaping is unconditional<a class="headerlink" href="#1-reaping-is-unconditional" title="Permanent link">&para;</a></h2>
+<p>When a process runs as <strong>PID 1</strong> (a container/microVM init, or any process the
+kernel has designated a <em>subreaper</em>), the kernel reparents every orphan to it.
+Those orphans must be <code>wait()</code>ed or they become permanent zombies that leak
+kernel process-table slots.</p>
+<p>Crucially, PID 1 receives orphans it <strong>never started</strong> — a container runtime
+forks intermediate helpers, a shell backgrounds a job, a library spawns a worker.
+So the reaper cannot be "the thing that watches my children"; it must
+unconditionally <code>Wait4(-1, …)</code> every reapable child on every <code>SIGCHLD</code>.</p>
+<p>That is why <code>supervisor.Reaper</code> is independent of the supervisor: it collects
+<em>all</em> zombies and publishes a <code>Reaped</code> event per collection. Consumers correlate
+the ones they care about and ignore the rest — the zombie is already gone either
+way.</p>
+<h2 id="2-supervising-is-selective">2. Supervising is selective<a class="headerlink" href="#2-supervising-is-selective" title="Permanent link">&para;</a></h2>
+<p>The <code>Supervisor</code> is the opposite: it only tracks the PIDs it launched through the
+<code>Runtime</code>. It indexes each started process by its runtime-reported pid, and when
+a <code>Reaped</code> event arrives for a pid it owns, it applies that process's
+<code>RestartPolicy</code>. Events for unknown pids are dropped.</p>
+<p>This separation means the supervisor logic is <strong>completely platform-independent</strong>
+— it never touches a syscall. Only the reaper is Linux-specific, and it sits
+behind a build tag:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">//go:build linux    // reaper.go:  SIGCHLD + Wait4</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">//go:build !linux   // reaper_stub.go:  Run blocks until ctx is cancelled</span>
 </code></pre></div>
-<p>Given the policy, the restart history, the current attempt, the incoming signal
-(<code>down</code> / <code>up</code> / <code>unhealthy</code> / <code>healthy</code>) and the current time, it returns a
-<code>Plan</code>: restart now, restart after a backoff <code>Delay</code>, debounce (still inside the
-grace window), or give up (too many restarts in the sliding window). No I/O, no
-goroutines, no wall-clock — <code>now</code> is a parameter — so every branch (anti-flap
-debounce, anti-thrash window, constant vs. exponential backoff) is unit-tested
-against fixed inputs.</p>
-<p>That pure core is then wrapped in a concurrent, per-unit <strong><code>Reconciler</code></strong> that
-receives the real signals and calls a caller-supplied <strong><code>Actions</code></strong> interface to
-carry out the plan. The concurrency and the effects live in the reconciler; the
-<em>logic</em> lives in <code>Decide</code>, where it can be proven correct.</p>
-<h2 id="why-pure-go-matters-here">Why pure Go matters here<a class="headerlink" href="#why-pure-go-matters-here" title="Permanent link">&para;</a></h2>
-<p>Because both modules are CGO-free and dependency-free, they:</p>
+<p>So <code>go build ./...</code>, <code>go vet ./...</code>, and the portable tests stay green on macOS
+and Windows, while the real subreaper is compiled and exercised on Linux (where
+100% coverage is measured).</p>
+<h2 id="3-respawning-is-a-decision-not-a-reflex">3. Respawning is a decision, not a reflex<a class="headerlink" href="#3-respawning-is-a-decision-not-a-reflex" title="Permanent link">&para;</a></h2>
+<p>"Process exited → start it again" is naïve: a process that crashes on boot will
+thrash your machine, and a liveness blip that self-heals should not trigger a
+restart at all. <code>respawn</code> turns the reflex into a <strong>decision</strong>:</p>
 <ul>
-<li>cross-compile to every Go target with no C toolchain, and link into a single
-  static binary — exactly what an init that ships inside a microVM image needs;</li>
-<li>carry <strong>no third-party dependencies</strong> — only the standard library and, on
-  Linux, <code>golang.org/x/sys</code>-level syscalls behind build tags;</li>
-<li>reach and hold <strong>100% coverage</strong> including error branches, because the
-  OS-facing parts are behind interfaces and stubs and the decision logic is a
-  pure function.</li>
+<li>a <strong>grace period</strong> debounces transient flaps before reacting;</li>
+<li><strong><code>max_restarts</code> within a sliding <code>window</code></strong> caps thrash and forces a
+  <code>cooldown</code> when exceeded;</li>
+<li><strong>backoff</strong> (constant or exponential, capped at 5 minutes) paces retries;</li>
+<li>an <strong><code>unhealthy</code></strong> liveness failure on an otherwise-running unit is recovered
+  as <em>stop-then-start</em>, not a bare start.</li>
 </ul>
-<p>See <a href="../supervisor/">supervisor</a> and <a href="../respawn/">respawn</a> for the concrete
-surfaces.</p>
+<p>The heart of it is a pure function:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Decide</span><span class="p">(</span><span class="nx">policy</span><span class="w"> </span><span class="o">*</span><span class="nx">RespawnPolicy</span><span class="p">,</span><span class="w"> </span><span class="nx">h</span><span class="w"> </span><span class="o">*</span><span class="nx">History</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">sig</span><span class="w"> </span><span class="nx">Signal</span><span class="p">,</span><span class="w"> </span><span class="nx">now</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="p">)</span><span class="w"> </span><span class="nx">Plan</span>
+</code></pre></div>
+<p>Because it takes <code>now</code> as an argument and returns a plain <code>Plan</code> value, every
+scheduling decision is unit-testable against a fixed clock — no goroutines, no
+real sleeps. The concurrent <code>Reconciler</code> is a thin shell that feeds signals into
+this core and effects the resulting plan through a caller-supplied <code>Actions</code>
+interface.</p>
+<h2 id="why-no-weft-grpc-or-health-checker-dependency">Why no weft, gRPC, or health-checker dependency<a class="headerlink" href="#why-no-weft-grpc-or-health-checker-dependency" title="Permanent link">&para;</a></h2>
+<p>These primitives were lifted from a microVM agent, where the restart policy came
+from a protobuf message and health came from a probe runner. Both couplings were
+<strong>cut</strong>: <code>RespawnPolicy</code> is now a local value type, and health is expressed as a
+local <code>SignalKind</code> (<code>down</code>/<code>up</code>/<code>unhealthy</code>/<code>healthy</code>) — you feed those signals
+from whatever source you like. The result is a pair of libraries with <strong>zero</strong>
+third-party dependencies that drop into any init, agent, or workload manager.</p>
 
 
 

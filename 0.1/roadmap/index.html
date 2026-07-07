@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Pure-Go (CGO-free) process-lifecycle primitives: a PID-1 subreaper and process supervisor, and a restart/reconcile state machine.">
+        <meta name="description" content="Pure-Go (no cgo) process-lifecycle primitives: a PID-1 subreaper + process supervisor and a restart/reconcile state machine.">
       
       
       
@@ -49,8 +49,6 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="../assets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -140,7 +138,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -150,7 +148,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
     
       <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -295,7 +293,7 @@
         
   
   <span class="md-ellipsis">
-    Why these primitives
+    Design — reap, supervise, respawn
   </span>
   
 
@@ -315,7 +313,7 @@
         
   
   <span class="md-ellipsis">
-    supervisor — reap & supervise
+    supervisor — subreaper + supervisor
   </span>
   
 
@@ -397,27 +395,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#supervisor" class="md-nav__link">
+  <a href="#done" class="md-nav__link">
     <span class="md-ellipsis">
-      supervisor
+      Done
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#respawn" class="md-nav__link">
+  <a href="#possible-next-steps" class="md-nav__link">
     <span class="md-ellipsis">
-      respawn
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documented-out-of-scope-boundaries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Documented out-of-scope boundaries
+      Possible next steps
     </span>
   </a>
   
@@ -478,27 +467,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#supervisor" class="md-nav__link">
+  <a href="#done" class="md-nav__link">
     <span class="md-ellipsis">
-      supervisor
+      Done
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#respawn" class="md-nav__link">
+  <a href="#possible-next-steps" class="md-nav__link">
     <span class="md-ellipsis">
-      respawn
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documented-out-of-scope-boundaries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Documented out-of-scope boundaries
+      Possible next steps
     </span>
   </a>
   
@@ -520,103 +500,34 @@
 
 
 <h1 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Permanent link">&para;</a></h1>
-<p>go-proc is grown <strong>test-first</strong>: each capability ships with tests and a coverage
-gate rather than being built in isolation. Both primitives are <strong>shipping</strong>; the
-list below records what is done and what is deliberately out of scope.</p>
-<h2 id="supervisor">supervisor<a class="headerlink" href="#supervisor" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Stage</th>
-<th>What</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Subreaper (Linux)</td>
-<td><code>PR_SET_CHILD_SUBREAPER</code> + a <code>SIGCHLD</code> handler draining <code>Wait4(-1, …, WNOHANG)</code>; orphans reaped, known PIDs routed to their owning <code>Proc</code>.</td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td>Portable stub</td>
-<td>Build-tagged no-op <code>StartReaper</code> for macOS / Windows / other GOOS so the package builds, tests and hits 100% coverage everywhere.</td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td>Spec / Proc / policy</td>
-<td><code>Spec</code> of named <code>Proc</code>s, each with a <code>RestartPolicy</code> (<code>Never</code> / <code>OnFailure</code> / <code>Always</code>); supervisor starts, watches and restarts per policy.</td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td>Pluggable <code>Runtime</code></td>
-<td><code>Runtime</code> interface (<code>Start</code> / <code>Stop</code>) as the OS seam; fake runtime drives every restart / error branch deterministically.</td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td>Exit correlation</td>
-<td><code>pid → Proc</code> mapping so each exit reaches its owner and true orphans are dropped.</td>
-<td><strong>Done</strong></td>
-</tr>
-</tbody>
-</table>
-<h2 id="respawn">respawn<a class="headerlink" href="#respawn" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Stage</th>
-<th>What</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Pure <code>Decide</code> core</td>
-<td><code>Decide(policy, history, attempt, signal, now) → Plan</code>; no I/O, <code>now</code> injected, every branch unit-tested.</td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td>Anti-flap debounce</td>
-<td>Grace-period debounce of <code>down</code> signals inside the flap window.</td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td>Anti-thrash window</td>
-<td><code>max_restarts</code> sliding-window budget → <code>GiveUp</code> when exhausted, ages out over time.</td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td>Backoff</td>
-<td>Constant and exponential (<code>base × factor^attempt</code>, clamped to <code>max</code>) delays.</td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td>Concurrent <code>Reconciler</code></td>
-<td>Per-unit state + serialized signals, carrying out plans through the caller's <code>Actions</code> interface.</td>
-<td><strong>Done</strong></td>
-</tr>
-</tbody>
-</table>
-<h2 id="documented-out-of-scope-boundaries">Documented out-of-scope boundaries<a class="headerlink" href="#documented-out-of-scope-boundaries" title="Permanent link">&para;</a></h2>
-<p>These are <strong>deliberate</strong>, recorded so each module's surface is unambiguous:</p>
+<p>Both primitives are shipped and released at 100% coverage across all six 64-bit
+Go arches. This page tracks what is done and what could come next.</p>
+<h2 id="done">Done<a class="headerlink" href="#done" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>No process spawning inside <code>respawn</code>.</strong> <code>respawn</code> decides; it never starts or
-  kills a process. Effects run through the caller's <code>Actions</code> — so the decision
-  core stays pure and testable. Spawning is the <code>Runtime</code>/<code>Actions</code> implementer's
-  job.</li>
-<li><strong>Subreaping is Linux-only by nature.</strong> On other platforms <code>StartReaper</code> is a
-  no-op stub by design; go-proc does not emulate a subreaper where the OS has no
-  such concept.</li>
-<li><strong>No supervision tree / dependency ordering (yet).</strong> <code>Spec</code> is a flat set of
-  procs; ordered start-up and inter-proc dependencies are not modelled here.</li>
-<li><strong>No config-file format.</strong> Both modules are libraries with Go APIs; parsing a
-  YAML/HCL unit file is a consumer concern layered on top.</li>
-<li><strong>No built-in health-check transport.</strong> <code>respawn</code> consumes <code>unhealthy</code> /
-  <code>healthy</code> <em>signals</em>; how a caller probes health (HTTP, TCP, exec) is outside
-  the module.</li>
+<li>[x] <strong>supervisor · subreaper</strong> — <code>SIGCHLD</code> + <code>Wait4(-1, WNOHANG)</code> drain,
+  portable <code>Reaped</code> events, Linux build tag with a no-op stub elsewhere.</li>
+<li>[x] <strong>supervisor · process supervision</strong> — pluggable <code>Runtime</code>, <code>Spec</code>/<code>Proc</code>
+  model, pid correlation, <code>RestartNever</code>/<code>RestartOnFailure</code>/<code>RestartAlways</code>,
+  <code>Stop</code> with SIGTERM → grace → SIGKILL.</li>
+<li>[x] <strong>respawn · decision core</strong> — pure <code>Decide</code> / <code>DecideAfterGrace</code>, grace
+  debounce, sliding-window <code>max_restarts</code>, constant/exponential backoff, cooldown.</li>
+<li>[x] <strong>respawn · Reconciler</strong> — per-unit goroutines, buffered signal fan-out,
+  policy hot-swap, race-safe watch/unwatch.</li>
+<li>[x] <strong>100% coverage</strong> (error branches included), <code>-race</code>, <code>gofmt</code> + <code>go vet</code>
+  clean, CI green on amd64, arm64, riscv64, loong64, ppc64le, s390x.</li>
 </ul>
-<p>See <a href="../supervisor/">supervisor</a> and <a href="../respawn/">respawn</a> for the shipping
-surfaces, and <a href="../why/">Why these primitives</a> for the split.</p>
+<h2 id="possible-next-steps">Possible next steps<a class="headerlink" href="#possible-next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] A ready-made <code>Runtime</code> adapter for OCI runtimes (crun/runc) as a separate,
+  optional sub-package (kept out of the core to preserve zero dependencies).</li>
+<li>[ ] A ready-made fork+exec <code>Runtime</code> for plain processes.</li>
+<li>[ ] Metrics/observability hooks (restart counts, cooldown entries) surfaced as
+  a small callback interface.</li>
+<li>[ ] A helper that bridges <code>supervisor</code> exit events into <code>respawn</code> signals, so
+  the two compose out of the box.</li>
+</ul>
+<p>Have a use case that needs one of these sooner? Open an issue on the relevant
+repository.</p>
 
 
 

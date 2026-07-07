@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Pure-Go (CGO-free) process-lifecycle primitives: a PID-1 subreaper and process supervisor, and a restart/reconcile state machine.">
+        <meta name="description" content="Pure-Go (no cgo) process-lifecycle primitives: a PID-1 subreaper + process supervisor and a restart/reconcile state machine.">
       
       
       
@@ -24,7 +24,7 @@
     
     
       
-        <title>supervisor — reap & supervise - go-proc docs</title>
+        <title>supervisor — subreaper + supervisor - go-proc docs</title>
       
     
     
@@ -49,8 +49,6 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
-    
-      <link rel="stylesheet" href="../assets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -78,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#supervisor-reap-supervise" class="md-skip">
+        <a href="#supervisor-subreaper-process-supervisor" class="md-skip">
           Skip to content
         </a>
       
@@ -117,7 +115,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              supervisor — reap & supervise
+              supervisor — subreaper + supervisor
             
           </span>
         </div>
@@ -140,7 +138,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -150,7 +148,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="orange" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
     
       <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -295,7 +293,7 @@
         
   
   <span class="md-ellipsis">
-    Why these primitives
+    Design — reap, supervise, respawn
   </span>
   
 
@@ -324,7 +322,7 @@
           
   
   <span class="md-ellipsis">
-    supervisor — reap & supervise
+    supervisor — subreaper + supervisor
   </span>
   
 
@@ -335,7 +333,7 @@
         
   
   <span class="md-ellipsis">
-    supervisor — reap & supervise
+    supervisor — subreaper + supervisor
   </span>
   
 
@@ -376,27 +374,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#spec-and-proc" class="md-nav__link">
+  <a href="#restart-policies" class="md-nav__link">
     <span class="md-ellipsis">
-      Spec and Proc
+      Restart policies
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#restartpolicy" class="md-nav__link">
+  <a href="#the-runtime-interface" class="md-nav__link">
     <span class="md-ellipsis">
-      RestartPolicy
+      The Runtime interface
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-runtime-seam" class="md-nav__link">
+  <a href="#clean-shutdown" class="md-nav__link">
     <span class="md-ellipsis">
-      The Runtime seam
+      Clean shutdown
     </span>
   </a>
   
@@ -408,18 +406,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#exit-correlation" class="md-nav__link">
+  <a href="#wiring-it-together" class="md-nav__link">
     <span class="md-ellipsis">
-      Exit correlation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#guarantees" class="md-nav__link">
-    <span class="md-ellipsis">
-      Guarantees
+      Wiring it together
     </span>
   </a>
   
@@ -539,27 +528,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#spec-and-proc" class="md-nav__link">
+  <a href="#restart-policies" class="md-nav__link">
     <span class="md-ellipsis">
-      Spec and Proc
+      Restart policies
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#restartpolicy" class="md-nav__link">
+  <a href="#the-runtime-interface" class="md-nav__link">
     <span class="md-ellipsis">
-      RestartPolicy
+      The Runtime interface
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-runtime-seam" class="md-nav__link">
+  <a href="#clean-shutdown" class="md-nav__link">
     <span class="md-ellipsis">
-      The Runtime seam
+      Clean shutdown
     </span>
   </a>
   
@@ -571,18 +560,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#exit-correlation" class="md-nav__link">
+  <a href="#wiring-it-together" class="md-nav__link">
     <span class="md-ellipsis">
-      Exit correlation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#guarantees" class="md-nav__link">
-    <span class="md-ellipsis">
-      Guarantees
+      Wiring it together
     </span>
   </a>
   
@@ -603,113 +583,90 @@
                   
 
 
-<h1 id="supervisor-reap-supervise">supervisor — reap &amp; supervise<a class="headerlink" href="#supervisor-reap-supervise" title="Permanent link">&para;</a></h1>
-<p><code>github.com/go-proc/supervisor</code> (package <code>supervisor</code>) is two cooperating
-pieces: a <strong>PID-1 subreaper</strong> and a <strong>process supervisor</strong>. The reaper turns OS
-signals into exit facts; the supervisor drives a <code>Spec</code> of processes over a
-pluggable <code>Runtime</code> and restarts each per its <code>RestartPolicy</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">&quot;github.com/go-proc/supervisor&quot;</span>
+<h1 id="supervisor-subreaper-process-supervisor">supervisor — subreaper + process supervisor<a class="headerlink" href="#supervisor-subreaper-process-supervisor" title="Permanent link">&para;</a></h1>
+<p><code>github.com/go-proc/supervisor</code> provides the two PID-1 responsibilities of an
+init: <strong>reaping</strong> every orphaned child, and <strong>supervising</strong> a declared set of
+processes through a pluggable runtime.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/go-proc/supervisor
 </code></pre></div>
-<p>Pure Go, <code>CGO_ENABLED=0</code>, dependency-free, 100% coverage, green on all six
-64-bit Go arches.</p>
 <h2 id="the-subreaper">The subreaper<a class="headerlink" href="#the-subreaper" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">stop</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">StartReaper</span><span class="p">()</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">defer</span><span class="w"> </span><span class="nx">stop</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">reaper</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">NewReaper</span><span class="p">(</span><span class="nx">log</span><span class="p">)</span><span class="w">   </span><span class="c1">// nil log → discard</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cancel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">WithCancel</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">())</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">defer</span><span class="w"> </span><span class="nx">cancel</span><span class="p">()</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">go</span><span class="w"> </span><span class="nx">reaper</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w">                     </span><span class="c1">// run for the life of PID 1</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">for</span><span class="w"> </span><span class="nx">ev</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">reaper</span><span class="p">.</span><span class="nx">Events</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="c1">// ev.PID, ev.ExitStatus, ev.Signaled, ev.Signal</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
 </code></pre></div>
-<p>On <strong>Linux</strong>, <code>StartReaper</code> marks the process as a child subreaper
-(<code>PR_SET_CHILD_SUBREAPER</code>) so that orphaned descendants re-parent to it rather
-than to the real PID 1, then installs a <code>SIGCHLD</code> handler that drains exits with
-<code>Wait4(-1, …, WNOHANG, …)</code>. Every reaped child's PID and wait-status is matched
-against the processes the supervisor started:</p>
-<ul>
-<li>a <strong>known</strong> PID → the exit is delivered to the owning <code>Proc</code>, which applies its
-  restart policy;</li>
-<li>an <strong>unknown</strong> PID (a true orphan) → reaped and discarded, so no zombie ever
-  accumulates.</li>
-</ul>
-<p>On <strong>macOS, Windows and every other GOOS</strong>, <code>StartReaper</code> is a build-tagged
-<strong>no-op stub</strong> returning a no-op <code>stop</code>, so consumer code is identical
-everywhere and still compiles into a static binary. The subreaper behaviour is a
-Linux concept; the stub keeps the package portable.</p>
-<p><code>stop()</code> uninstalls the handler and restores prior signal handling — important
-for tests and for hosts that only want the reaper active for part of their
-lifetime.</p>
+<p><code>Run</code> installs a <code>SIGCHLD</code> handler, then on every signal drains all reapable
+children with a non-blocking <code>Wait4(-1, WNOHANG)</code>, publishing one <code>Reaped</code> per
+collection. It does an initial drain before blocking so an exit that races
+startup is never missed. On non-Linux platforms <code>Run</code> is a no-op stub that blocks
+until <code>ctx</code> is cancelled — the API is identical, so cross-platform builds compile
+and vet cleanly.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Reaped</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">PID</span><span class="w">        </span><span class="kt">int</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">ExitStatus</span><span class="w"> </span><span class="kt">int</span><span class="w">  </span><span class="c1">// exit code; -1 when terminated by a signal</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nx">Signaled</span><span class="w">   </span><span class="kt">bool</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nx">Signal</span><span class="w">     </span><span class="kt">int</span><span class="w">  </span><span class="c1">// terminating signal number when Signaled</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>No <code>syscall</code> types leak into the API: the Linux reaper translates a <code>WaitStatus</code>
+into these portable fields.</p>
+<div class="admonition note">
+<p class="admonition-title">A full <code>Events</code> buffer drops correlation, not zombies</p>
+<p>The events channel is buffered (64). If a receiver stalls and the buffer
+fills, the reaper <strong>still reaps</strong> the zombie — only the exit <em>notification</em> is
+dropped (and logged). Zombies never leak.</p>
+</div>
 <h2 id="the-supervisor">The supervisor<a class="headerlink" href="#the-supervisor" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">sup</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">rt</span><span class="p">,</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Spec</span><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">Procs</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Proc</span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api&quot;</span><span class="p">,</span><span class="w">   </span><span class="nx">Restart</span><span class="p">:</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Always</span><span class="p">},</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;batch&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Restart</span><span class="p">:</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">OnFailure</span><span class="p">},</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;migrate&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Restart</span><span class="p">:</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Never</span><span class="p">},</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">})</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sup</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">spec</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Spec</span><span class="p">{</span><span class="nx">Procs</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">Proc</span><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;web&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Target</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/bundles/web&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Restart</span><span class="p">:</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">RestartAlways</span><span class="p">},</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;job&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Target</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/bundles/job&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Restart</span><span class="p">:</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">RestartOnFailure</span><span class="p">},</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}}</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nx">sup</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">supervisor</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">log</span><span class="p">,</span><span class="w"> </span><span class="nx">myRuntime</span><span class="p">,</span><span class="w"> </span><span class="nx">reaper</span><span class="p">,</span><span class="w"> </span><span class="nx">spec</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sup</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// blocks until all done or ctx cancel</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nx">log</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="s">&quot;supervisor exited&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;err&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">}</span>
 </code></pre></div>
-<h3 id="spec-and-proc"><code>Spec</code> and <code>Proc</code><a class="headerlink" href="#spec-and-proc" title="Permanent link">&para;</a></h3>
-<p>A <code>Spec</code> is an ordered set of named <code>Proc</code>s. Each <code>Proc</code> carries at least a
-<code>Name</code> and a <code>RestartPolicy</code>; the concrete command/args/env it represents is the
-<code>Runtime</code>'s concern, keyed by name. The supervisor starts every proc, watches
-for its exit (via the reaper's exit facts), and consults the policy.</p>
-<h3 id="restartpolicy"><code>RestartPolicy</code><a class="headerlink" href="#restartpolicy" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Policy</th>
-<th style="text-align: center;">Restart on clean exit (status 0)</th>
-<th style="text-align: center;">Restart on failure (status ≠ 0)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Never</code></td>
-<td style="text-align: center;">no</td>
-<td style="text-align: center;">no</td>
-</tr>
-<tr>
-<td><code>OnFailure</code></td>
-<td style="text-align: center;">no</td>
-<td style="text-align: center;">yes</td>
-</tr>
-<tr>
-<td><code>Always</code></td>
-<td style="text-align: center;">yes</td>
-<td style="text-align: center;">yes</td>
-</tr>
-</tbody>
-</table>
-<p><code>OnFailure</code> is the right default for one-shot-but-critical work (a migration that
-must succeed); <code>Always</code> for long-lived services that should never stay down;
-<code>Never</code> for genuine run-once tasks. Restart <em>timing</em> — backoff, anti-flap,
-anti-thrash — is not decided here; that is <a href="../respawn/"><code>respawn</code></a>'s job, and the
-two compose.</p>
-<h3 id="the-runtime-seam">The <code>Runtime</code> seam<a class="headerlink" href="#the-runtime-seam" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Runtime</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nx">Start</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="nx">Proc</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">pid</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nx">Stop</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">pid</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+<p><code>Run</code> starts each <code>Proc</code> via the <code>Runtime</code>, indexes its pid, then launches a
+goroutine that consumes reaper events and applies each process's restart policy.
+It blocks until every process has exited with no further restart, or <code>ctx</code> is
+cancelled. A failed <em>initial</em> start is fatal (returned wrapped); a per-process
+exit handled by the restart policy is not.</p>
+<h3 id="restart-policies">Restart policies<a class="headerlink" href="#restart-policies" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">const</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nx">RestartNever</span><span class="w">     </span><span class="nx">RestartPolicy</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">            </span><span class="c1">// never restart (zero value)</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nx">RestartOnFailure</span><span class="w"> </span><span class="nx">RestartPolicy</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;on-failure&quot;</span><span class="w">  </span><span class="c1">// restart on non-zero exit or signal</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nx">RestartAlways</span><span class="w">    </span><span class="nx">RestartPolicy</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;always&quot;</span><span class="w">      </span><span class="c1">// restart on any exit</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">)</span>
 </code></pre></div>
-<p><code>Runtime</code> is the pluggable boundary between the supervisor's policy logic and the
-OS. In production it starts real processes; in tests a <strong>fake runtime</strong> returns
-scripted PIDs and exit statuses, which is how every restart branch — clean exit,
-failure, start error, stop error, context cancellation — is covered
-deterministically without forking. Correlating an exit back to the owning <code>Proc</code>
-is done by the PID the <code>Runtime</code> returned from <code>Start</code>.</p>
-<h2 id="exit-correlation">Exit correlation<a class="headerlink" href="#exit-correlation" title="Permanent link">&para;</a></h2>
-<p>The reaper produces <code>(pid, status)</code>; the supervisor holds a <code>pid → Proc</code> map from
-its <code>Start</code> calls. When an exit arrives it looks up the owner, records the
-outcome, and applies the policy. Orphan PIDs that were never in the map are
-reaped and dropped. This is what keeps a busy PID 1 zombie-free while still
-giving each supervised process an accurate view of its own lifecycle.</p>
-<h2 id="guarantees">Guarantees<a class="headerlink" href="#guarantees" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Pure Go / <code>CGO_ENABLED=0</code></strong> — static binary, trivial cross-compilation.</li>
-<li><strong>Portable</strong> — Linux does real subreaping; other GOOS builds via a no-op stub.</li>
-<li><strong>Deterministically testable</strong> — the <code>Runtime</code> interface and the stubbed reaper
-  give fault-injection seams for 100% branch coverage.</li>
-<li><strong>Six-arch clean</strong> — <code>gofmt</code> + <code>go vet</code> clean, CI-green on amd64, arm64,
-  riscv64, loong64, ppc64le, s390x.</li>
-</ul>
-<p>See <a href="../respawn/">respawn</a> for the restart-timing decision that layers on top, and
-<a href="../why/">Why these primitives</a> for the reap / supervise / respawn split.</p>
+<h3 id="the-runtime-interface">The Runtime interface<a class="headerlink" href="#the-runtime-interface" title="Permanent link">&para;</a></h3>
+<p>The supervisor never interprets what a <code>Proc</code> <em>is</em> — <code>Proc.Target</code> is an opaque
+handle the <code>Runtime</code> understands (an OCI bundle dir, a command, a unit name).
+Implement six methods and the supervisor drives anything: an OCI runtime
+(crun/runc), a raw fork+exec launcher, or a test fake.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Runtime</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nx">Name</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nx">Create</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">target</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">stdio</span><span class="w"> </span><span class="nx">Stdio</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nx">Start</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nx">State</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">status</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">pid</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="nx">Kill</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nx">Delete</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="clean-shutdown">Clean shutdown<a class="headerlink" href="#clean-shutdown" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">sup</span><span class="p">.</span><span class="nx">Stop</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span><span class="w"> </span><span class="c1">// SIGTERM every process, wait grace, then SIGKILL survivors</span>
+</code></pre></div>
+<p><code>Stop</code> disables restart for the rest of the supervisor's life, sends <code>SIGTERM</code> to
+each still-running process (suppressing <code>ESRCH</code> for processes already gone), waits
+up to <code>grace</code>, then <code>SIGKILL</code>s any survivors.</p>
+<h2 id="wiring-it-together">Wiring it together<a class="headerlink" href="#wiring-it-together" title="Permanent link">&para;</a></h2>
+<p>The reaper and supervisor share one <code>Reaper</code>: the reaper collects <em>all</em> zombies;
+the supervisor correlates the ones whose pids it launched and ignores the rest.
+Run the reaper for the whole life of PID 1; run (and optionally <code>Stop</code>) the
+supervisor for the workload you manage.</p>
 
 
 
